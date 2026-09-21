@@ -1,0 +1,36 @@
+# I created this custom rule to detect if any process attempts to search
+# for GCP Credentials using standard GCP Credentials environment variables & file
+# lcoation. First defined macro containing common gcp credentials values, then defined a rule to
+# detect if any process including grep or find process searching for the values
+
+customRules:
+  custom-rules-gcp-creds.yaml: |-
+    - macro: private_gcp_credentials
+      condition: >
+        (proc.args icontains "GOOGLE_APPLICATION_CREDENTIALS" or
+         proc.args icontains "application_default_credentials.json" or
+         proc.args icontains ".config/gcloud" or
+         proc.args icontains "service_account")
+
+    - rule: Find GCP Credentials
+      desc: >
+        Detect attempts to search for Google Cloud credentials using grep or find commands, particularly targeting standard GCP credential locations.
+      condition: >
+        spawned_process
+        and ((grep_commands and private_gcp_credentials) or
+             (proc.name = "find" and
+             (proc.args icontains "application_default_credentials.json" or
+              proc.args icontains ".config/gcloud")))
+      output: >
+        Detected GCP credentials search activity |
+        proc_pcmdline=%proc.pcmdline
+        proc_cwd=%proc.cwd
+        group_gid=%group.gid
+        group_name=%group.name
+        user_loginname=%user.loginname
+        evt_type=%evt.type
+        user=%user.name
+        user_uid=%user.uid
+        user_loginuid=%user.loginuid
+      priority: WARNING
+      tags: [maturity_stable, host, container, process, gcp, mitre_credential_access, T1552]

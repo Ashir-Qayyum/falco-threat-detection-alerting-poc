@@ -1,0 +1,17 @@
+falcosidekick:
+
+  config:
+    smtp:
+      hostport: "smtp.gmail.com:587"
+      tls: true
+      authmechanism: "plain"
+
+      user: "muhammadashir2004@gmail.com"
+      password: "****************"
+
+      from: "muhammadashir2004@gmail.com"
+      to: "muhammadashir2004@gmail.com"
+
+      outputformat: "html"
+
+      minimumpriority: "warning"
